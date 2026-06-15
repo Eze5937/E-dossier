@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Admin Assignment Console</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Ensuring a matching layout consistency */
+        .admin-container { display: flex; min-height: 100vh; background: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar { width: 260px; background: #1e1b4b; padding: 24px; border-right: 2px solid #4c1d95; }
+        .main-workspace { flex: 1; padding: 40px; }
+        .panel-card { background: #1e293b; border: 1px solid #334155; padding: 30px; border-radius: 8px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 8px; color: #94a3b8; font-size: 14px; font-weight: 600; }
+        .form-group input, .form-group select { background: #0f172a; color: #ffffff; border: 1px solid #334155; padding: 10px; border-radius: 4px; font-size: 15px; }
+        .form-group input:focus, .form-group select:focus { border-color: #a78bfa; outline: none; }
+        .submit-btn { background: #a78bfa; color: #0f172a; font-weight: 700; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; transition: background 0.2s; }
+        .submit-btn:hover { background: #c084fc; }
+        .section-header { text-align: center; margin-bottom: 30px; }
+        .section-header h2 { color: #a78bfa; margin: 0; }
+        .section-header p { color: #94a3b8; font-size: 14px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="allocate-subjects.html">Subject Allocation Framework</a>
+                <a href="assign-teachers.html" class="active">Assign Form Teachers</a>
+                <a href="manage-students.html">Student Rosters</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-workspace">
+            <div class="panel-card">
+                <div class="section-header">
+                    <h2>jss2 student portal</h2>
+                    <p>Provision credentials and assign class scopes or subject tracks.</p>
+                </div>
+
+                <form id="assignmentForm">
+                    <h4 style="color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-bottom: 15px;">1. Profile & Authentication Setup</h4>
+                    
+                    <div class="form-group">
+                        <label>Staff Full Name</label>
+                        <input type="text" id="teacherName" placeholder="e.g., Izuchukwu Emmanuel" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Official Email Address</label>
+                        <input type="email" id="teacherEmail" placeholder="e.g., emmanuel@school.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Portal Access Password</label>
+                        <input type="text" id="teacherPassword" placeholder="Set entry password" required>
+                    </div>
+
+                    <h4 style="color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px;">2. Operational Scope Allocation</h4>
+
+                    <div class="form-group">
+                        <label>Staff Designation / Role Mode</label>
+                        <select id="teacherRole" onchange="toggleSubjectDropdown()" required>
+                            <option value="Form Teacher" selected>Form Teacher (Classroom Intake Manager)</option>
+                            <option value="Subject Teacher">Subject Teacher (CA Score Recorder)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Target Class Tier</label>
+                        <select id="assignedClass" required>
+                            <option value="">-- Choose Class --</option>
+                            <option value="JSS 1">JSS 1</option>
+                            <option value="JSS 2">JSS 2</option>
+                            <option value="JSS 3">JSS 3</option>
+                            <option value="SSS 1">SSS 1</option>
+                            <option value="SSS 2">SSS 2</option>
+                            <option value="SSS 3">SSS 3</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Class Arm / Stream Allocation</label>
+                        <select id="assignedArm" required>
+                            <option value="">-- Choose Arm --</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="subjectSelectionBlock" style="display: none;">
+                        <label style="color: #fca5a5;">Assigned Subject Specialization</label>
+                        <select id="assignedSubject">
+                            <option value="">-- Select Subject Allocation --</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="English Language">English Language</option>
+                            <option value="Further Mathematics">Further Mathematics</option>
+                            <option value="Biology">Biology</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Agricultural Science">Agricultural Science</option>
+                            <option value="Geography">Geography</option>
+                            <option value="Technical Drawing">Technical Drawing</option>
+                            <option value="Literature-in-English">Literature-in-English</option>
+                            <option value="History">History</option>
+                            <option value="Government">Government</option>
+                            <option value="Economics">Economics</option>
+                            <option value="Christian Religious Studies">Christian Religious Studies</option>
+                            <option value="Islamic Religious Studies">Islamic Religious Studies</option>
+                            <option value="Civic Education">Civic Education</option>
+                            <option value="French Language">French Language</option>
+                            <option value="Data Processing">Data Processing</option>
+                            <option value="Garment Making">Garment Making</option>
+                            <option value="Catering Craft Practice">Catering Craft Practice</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Commit Account & Save Allocation</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+<script>
+    function handleLogout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+
+    // Toggle subject selection display dynamically and clear required rules safely
+    function toggleSubjectDropdown() {
+        const role = document.getElementById('teacherRole').value;
+        const subjectBlock = document.getElementById('subjectSelectionBlock');
+        const subjectSelect = document.getElementById('assignedSubject');
+
+        if (role === 'Subject Teacher') {
+            subjectBlock.style.display = 'flex';
+            subjectSelect.required = true;
+        } else {
+            subjectBlock.style.display = 'none';
+            subjectSelect.required = false;
+            subjectSelect.value = ''; // Clean field out
+        }
+    }
+
+    // Make sure rules are correct immediately when the page loads up
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleSubjectDropdown();
+    });
+
+    // Submit form payload data directly to server.js
+    document.getElementById('assignmentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const role = document.getElementById('teacherRole').value;
+        const subjectValue = document.getElementById('assignedSubject').value;
+
+        const payload = {
+            name: document.getElementById('teacherName').value.trim(),
+            email: document.getElementById('teacherEmail').value.trim(),
+            password: document.getElementById('teacherPassword').value,
+            role: role,
+            assignedClass: document.getElementById('assignedClass').value,
+            assignedArm: document.getElementById('assignedArm').value,
+            subject: role === 'Subject Teacher' ? subjectValue : null
+        };
+
+        console.log("Transmitting data packet:", payload);
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/teachers/assign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(`Success: ${data.message}`);
+                document.getElementById('assignmentForm').reset();
+                
+                // Re-evaluate inputs after resetting form values
+                toggleSubjectDropdown();
+                
+                if (typeof loadTeachers === 'function') loadTeachers(); 
+            } else {
+                alert(`Configuration Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Network communication failure:", error);
+            alert("Could not connect to the backend server. Make sure server.js is active.");
+        }
+    });
+</script>
+</body>
+</html>

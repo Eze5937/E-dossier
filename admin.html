@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Admin Operations Workspace</title>
+    <style>
+        /* ==========================================================================
+           1. ROOT VARIABLES & GLOBAL RESET
+           ========================================================================== */
+        :root {
+            --bg-main: #0b0f19;
+            --bg-sidebar: #111827;
+            --bg-card: #1e293b;
+            --bg-gateway: #0f172a;
+            --border-color: #1e293b;
+            --border-card: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --accent: #38bdf8;
+            --accent-purple: #a78bfa;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* ==========================================================================
+           2. GLOBAL TIERS GATEWAY STRIP
+           ========================================================================== */
+        .portal-navigation-strip {
+            background: var(--bg-gateway);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+        }
+
+        .portal-brand {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .portal-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .portal-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .portal-links a.active-tier {
+            color: #ffffff;
+            background: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        .portal-links a:hover:not(.active-tier) {
+            color: #f1f5f9;
+            background: #1e293b;
+        }
+
+        /* ==========================================================================
+           3. MAIN INTEGRATED FLEXBOX WORKSPACE
+           ========================================================================== */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 51px);
+            width: 100%;
+            position: relative;
+        }
+
+        /* ==========================================================================
+           4. SIDEBAR COMPONENT
+           ========================================================================== */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid #1f2937;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .logo-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-area h3 {
+            color: var(--accent);
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .close-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.75rem;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover:not(.logout-link) {
+            background-color: #1f2937;
+            color: var(--text-main);
+        }
+
+        .nav-links a.active {
+            background-color: #1e293b;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .nav-links .logout-link {
+            margin-top: 24px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+            color: #ef4444;
+        }
+
+        .nav-links .logout-link:hover {
+            color: #f87171;
+        }
+
+        /* ==========================================================================
+           5. MAIN CONTENT WORKSPACE & OPERATION GRID
+           ========================================================================== */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            box-sizing: border-box;
+            background: var(--bg-main);
+            overflow-y: auto;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .dash-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .hamburger-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .school-badge {
+            background: #1e293b;
+            border: 1px solid var(--border-card);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Operational Core Menu Matrix Layout */
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .operation-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 28px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .operation-card:hover {
+            transform: translateY(-4px);
+            border-color: #475569;
+            box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.7);
+        }
+
+        .card-details h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-details p {
+            margin: 0 0 24px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .btn-launch {
+            display: inline-block;
+            text-align: center;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-launch:hover {
+            background: #1d4ed8;
+        }
+
+        /* Secondary variant coloring styling indicators */
+        .variant-purple .btn-launch { background: #6d28d9; }
+        .variant-purple .btn-launch:hover { background: #5b21b6; }
+        
+        .variant-emerald .btn-launch { background: #047857; }
+        .variant-emerald .btn-launch:hover { background: #065f46; }
+
+        /* Overlay Background mask for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 990;
+        }
+
+        /* ==========================================================================
+           6. RESPONSIVE MEDIA QUERIES
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .hamburger-menu-btn, .close-menu-btn { display: block; }
+            
+            .sidebar {
+                position: fixed;
+                top: 51px; left: 0;
+                height: calc(100vh - 51px);
+                transform: translateX(-100%);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
+            .main-content { padding: 20px; }
+            .dash-header .school-badge { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portal-navigation-strip">
+        <div class="portal-brand">🌐 System Gateway</div>
+        <div class="portal-links">
+            <a href="admin.html" class="active-tier">Admin Portal</a>
+            <a href="staff-login.html">Staff Portal</a>
+            <a href="student-portal.html">Student/Parent Portal</a>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMenu()"></div>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Portal Menu</h3>
+                <button class="close-menu-btn" onclick="toggleSidebarMenu()">×</button>
+            </div>
+            <nav class="nav-links">
+                <div style="margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <a href="admin.html" class="active" style="background-color: var(--primary); color: #ffffff;">⚙️ Admin Portal</a>
+                    <a href="staff-login.html">👨‍🏫 Staff Portal</a>
+                    <a href="student-portal.html">🎓 Student/Parent Portal</a>
+                </div>
+
+                <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding-left: 16px; margin-bottom: 4px;">Navigation</span>
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="admin.html" class="active">Operations Workspace</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="hamburger-menu-btn" onclick="toggleSidebarMenu()">☰</button>
+                    <h2>Administrative Operations Workspace</h2>
+                </div>
+                <div class="school-badge">System Mode: Root Access</div>
+            </header>
+
+            <section class="operations-grid">
+
+                <div class="operation-card">
+                    <div class="card-details">
+                        <h4>📖 Subject Allocation Framework</h4>
+                        <p>Map academic subjects and syllabus modules to their structural class arms (e.g., assigning Further Mathematics structures to SSS 1A track targets).</p>
+                    </div>
+                    <a href="allocate-subjects.html" class="btn-launch">Open Mapping Console</a>
+                </div>
+
+                <div class="operation-card variant-purple">
+                    <div class="card-details">
+                        <h4>👨‍🏫 Assign Form Teachers</h4>
+                        <p>Deploy specialized teaching personnel to manage specific classroom registers and automatically provision individual portal security authentication keys.</p>
+                    </div>
+                    <a href="assign-teachers.html" class="btn-launch">Open Deployment Deck</a>
+                </div>
+
+                <div class="operation-card">
+                    <div class="card-details">
+                        <h4>🎒 Enroll New Student</h4>
+                        <p>Initialize and provision fresh permanent academic student folders inside the central ledger repository for the ongoing academic term session.</p>
+                    </div>
+                    <a href="enroll-student.html" class="btn-launch">Open Enrollment Panel</a>
+                </div>
+
+                <div class="operation-card variant-emerald">
+                    <div class="card-details">
+                        <h4>📊 View Class Results</h4>
+                        <p>Review collective broadsheets, performance trends, aggregate percentiles, and general score metrics grouped by class arm segments.</p>
+                    </div>
+                    <a href="view-class-results.html" class="btn-launch">Generate Broadsheet View</a>
+                </div>
+
+                <div class="operation-card variant-emerald">
+                    <div class="card-details">
+                        <h4>🎓 View Student Result</h4>
+                        <p>Locate, view, and print standalone cumulative assessment profiles and report cards for individual student profiles via ID queries.</p>
+                    </div>
+                    <a href="view-student-result.html" class="btn-launch">Look Up Academic Card</a>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebarMenu() {
+            document.getElementById('dashboardSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "admin-login.html";
+        }
+    </script>
+</body>
+</html>

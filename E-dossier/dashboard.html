@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Institutional Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMenu()"></div>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+                <button class="close-menu-btn" onclick="toggleSidebarMenu()">×</button>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html" class="active">Overview Panel</a>
+                <a href="allocate-subjects.html">Subject Allocation Framework</a>
+                <a href="assign-teachers.html">Assign Form Teachers</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="hamburger-menu-btn" onclick="toggleSidebarMenu()">☰</button>
+                    <h2>Institutional Control Panel</h2>
+                </div>
+                <div class="school-badge">Active Session: 2025/2026</div>
+            </header>
+
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <h4>Initialized Classes</h4>
+                    <p class="number" id="activeClassArmsCount">...</p>
+                    <span class="trend positive">With Allocated Subjects</span>
+                </div>
+                <div class="metric-card">
+                    <h4>Deployed Form Teachers</h4>
+                    <p class="number" id="staffPortalKeysCount">...</p>
+                    <span class="trend neutral">Staff Portal Keys</span>
+                </div>
+                <div class="metric-card student-highlight">
+                    <h4>Total Assigned Students</h4>
+                    <p class="number large-display" id="totalStudentsCount">...</p>
+                    <span class="trend status-active">Active Academic Dossiers</span>
+                </div>
+            </section>
+
+            <section class="action-hub">
+                <h3>Institutional Setup Sequences</h3>
+                <p>Initialize your workspace infrastructure below. Configure class subject mappings, then generate accounts for your form teachers so they can manage student intakes:</p>
+                <div class="action-buttons">
+                    <a href="allocate-subjects.html" style="text-decoration: none;">
+                        <button type="button" class="btn-action">Step 1: Allocate Subjects to Class Arms (e.g., Further Maths to SSS 1A)</button>
+                    </a>
+                    <a href="assign-teachers.html" style="text-decoration: none;">
+                        <button type="button" class="btn-action" style="border-color: #a78bfa; color: #a78bfa;">
+                            Step 2: Assign Form Teachers & Generate Portal Login Details
+                        </button>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebarMenu() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // DYNAMIC METRICS AGGREGATOR ENGINE
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Fetch stats bundle counter from your node backend pool server
+                const response = await fetch('http://127.0.0.1:5000/api/admin/dashboard-stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update layout metrics values from database realities safely
+                    document.getElementById('activeClassArmsCount').innerText = String(data.stats.activeClassArms).padStart(2, '0');
+                    document.getElementById('staffPortalKeysCount').innerText = String(data.stats.deployedTeachers).padStart(2, '0');
+                    document.getElementById('totalStudentsCount').innerText = data.stats.totalStudents;
+                } else {
+                    console.error("Dashboard engine stats extraction failure:", data.error);
+                }
+            } catch (err) {
+                console.error("Could not reach backend framework metrics aggregator engine:", err);
+                // Fallback graceful degradation placeholders if server isn't mounted yet
+                document.getElementById('activeClassArmsCount').innerText = "00";
+                document.getElementById('staffPortalKeysCount').innerText = "00";
+                document.getElementById('totalStudentsCount').innerText = "0";
+            }
+        });
+    </script>
+</body>

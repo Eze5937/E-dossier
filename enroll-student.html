@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Student Intake Workspace</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Modern Matrix Dashboard System Styling */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+        
+        .admin-container { display: flex; min-height: 100vh; width: 100%; }
+        
+        /* Persistent Sidebar Panel Layout */
+        .sidebar { 
+            width: 280px; 
+            background: #1e1b4b; 
+            padding: 24px; 
+            border-right: 2px solid #4c1d95; 
+            display: flex; 
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .logo-area { padding-bottom: 24px; border-bottom: 1px solid #4c1d95; margin-bottom: 20px; }
+        .logo-area h3 { color: #a78bfa; font-size: 20px; font-weight: 700; }
+        .nav-links { display: flex; flex-direction: column; gap: 8px; }
+        .nav-links a { color: #94a3b8; text-decoration: none; padding: 12px 16px; border-radius: 6px; font-size: 15px; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        .nav-links a:hover, .nav-links a.active { background: #4c1d95; color: #ffffff; }
+        .nav-links .logout-link { margin-top: 40px; color: #fca5a5; }
+        .nav-links .logout-link:hover { background: #7f1d1d; color: #ffffff; }
+
+        /* Main Workspace Environment */
+        .main-workspace { flex: 1; padding: 40px; width: 100%; overflow-y: auto; }
+        .workspace-header { margin-bottom: 30px; }
+        .workspace-header h2 { color: #a78bfa; font-size: 28px; font-weight: 700; }
+        .workspace-header p { color: #94a3b8; font-size: 15px; margin-top: 6px; }
+
+        /* Full Screen Form Card Architecture */
+        .panel-card { 
+            background: #1e293b; 
+            border: 1px solid #334155; 
+            padding: 36px; 
+            border-radius: 10px; 
+            width: 100%; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); 
+        }
+        
+        .form-section-title { 
+            color: #cbd5e1; 
+            border-bottom: 1px solid #334155; 
+            padding-bottom: 8px; 
+            margin-bottom: 24px; 
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .form-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { color: #94a3b8; font-size: 14px; font-weight: 600; }
+        .form-group input, .form-group select { background: #0f172a; color: #ffffff; border: 1px solid #475569; padding: 12px; border-radius: 6px; font-size: 15px; width: 100%; }
+        .form-group input:focus, .form-group select:focus { border-color: #a78bfa; outline: none; }
+        
+        .submit-btn-container { display: flex; justify-content: flex-end; }
+        .submit-btn { background: #a78bfa; color: #0f172a; font-weight: 700; padding: 14px 32px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+        .submit-btn:hover { background: #c084fc; }
+
+        /* Widescreen Overlay Dialog Modal (Student Ledger) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center; align-items: center;
+            padding: 40px;
+        }
+        .modal-content {
+            background: #1e293b;
+            border: 2px solid #4c1d95;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 { color: #a78bfa; font-size: 22px; }
+        .close-modal-btn { background: #334155; border: none; color: #ffffff; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .close-modal-btn:hover { background: #ef4444; }
+
+        /* Interactive Roster Table Layout */
+        .table-container { flex: 1; overflow-y: auto; background: #0f172a; border-radius: 6px; border: 1px solid #334155; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 14px; border-bottom: 1px solid #334155; }
+        th { background: #1e1b4b; color: #a78bfa; font-weight: 600; position: sticky; top: 0; }
+        tr:hover { background: #1e293b; }
+        
+        .delete-btn { background: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .delete-btn:hover { background: #ef4444; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="allocate-subjects.html">Subject Allocation Framework</a>
+                <a href="assign-teachers.html">Assign Form Teachers</a>
+                <a onclick="openRosterLedgerModal()" class="active">Student Rosters (View/Manage)</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-workspace">
+            <div class="workspace-header">
+                <h2>Student Admission & Enrollment Registration</h2>
+                <p>Register new academic records, map operational trackers, and generate systemic baseline identities.</p>
+            </div>
+
+            <div class="panel-card">
+                <form id="enrollmentForm">
+                    <div class="form-section-title">1. Personal Profile Identity Core Details</div>
+                    <div class="form-grid-layout">
+                        <div class="form-group">
+                            <label>Student Systemic Admission ID Number</label>
+                            <input type="text" id="admissionNo" placeholder="e.g., STARS/2026/041" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Student Full Name (Surname First)</label>
+                            <input type="text" id="studentName" placeholder="e.g., Alao Christopher" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Gender Identification</label>
+                            <select id="studentGender" required>
+                                <option value="" disabled selected>Choose Option</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">2. Curricular Academic Stream Mapping Placement</div>
+                    <div class="form-grid-layout">
+                        <div class="form-group">
+                            <label>School Section Track</label>
+                            <select id="schoolSection" onchange="handleSectionChange()" required>
+                                <option value="" disabled selected>Select Track Section</option>
+                                <option value="Primary School">Primary School</option>
+                                <option value="Junior Secondary">Junior Secondary</option>
+                                <option value="Senior Secondary (Science)">Senior Secondary (Science)</option>
+                                <option value="Senior Secondary (Arts)">Senior Secondary (Arts)</option>
+                                <option value="Senior Secondary (Commercial)">Senior Secondary (Commercial)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Assigned Class Level</label>
+                            <select id="assignedClass" required disabled>
+                                <option value="" disabled selected>Select Section First</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Class Arm Stream Allocation</label>
+                            <select id="assignedArm" required>
+                                <option value="" disabled selected>Choose Stream Arm</option>
+                                <option value="A">Arm A</option>
+                                <option value="B">Arm B</option>
+                                <option value="C">Arm C</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="submit-btn-container">
+                        <button type="submit" class="submit-btn">Commit Enrollment File Entry</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="rosterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Systemic Student Enrollment Roster Ledger Database Pool</h3>
+                <button class="close-modal-btn" onclick="closeRosterLedgerModal()">Minimize Window</button>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Admission ID</th>
+                            <th>Full Name</th>
+                            <th>Gender</th>
+                            <th>Section</th>
+                            <th>Class Level</th>
+                            <th>Stream Arm</th>
+                            <th>Action Domain</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rosterTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const curriculumRepository = {
+        "Primary School": ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"],
+        "Junior Secondary": ["JSS 1", "JSS 2", "JSS 3"],
+        "Senior Secondary (Science)": ["SSS 1", "SSS 2", "SSS 3"],
+        "Senior Secondary (Arts)": ["SSS 1", "SSS 2", "SSS 3"],
+        "Senior Secondary (Commercial)": ["SSS 1", "SSS 2", "SSS 3"]
+    };
+
+    function handleSectionChange() {
+        const sectionSelected = document.getElementById('schoolSection').value;
+        const classSelect = document.getElementById('assignedClass');
+
+        classSelect.innerHTML = '<option value="" disabled selected>Select Tier</option>';
+        classSelect.disabled = false;
+
+        if (!curriculumRepository[sectionSelected]) return;
+
+        curriculumRepository[sectionSelected].forEach(cls => {
+            const opt = document.createElement('option');
+            opt.value = cls;
+            opt.textContent = cls;
+            classSelect.appendChild(opt);
+        });
+    }
+
+    // Submit Registration Packet directly to Node Server
+    document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            admissionNo: document.getElementById('admissionNo').value.trim(),
+            name: document.getElementById('studentName').value.trim(),
+            gender: document.getElementById('studentGender').value,
+            schoolSection: document.getElementById('schoolSection').value,
+            assignedClass: document.getElementById('assignedClass').value,
+            assignedArm: document.getElementById('assignedArm').value
+        };
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/students/enroll', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert(`Enrollment complete: ${data.message}`);
+                document.getElementById('enrollmentForm').reset();
+                document.getElementById('assignedClass').disabled = true;
+            } else {
+                alert(`Intake Error: ${data.error}`);
+            }
+        } catch (error) {
+            alert("Could not interface with baseline server engine application layer.");
+        }
+    });
+
+    // Modal Ledger Overlay Control Logic Functions
+    async function openRosterLedgerModal() {
+        document.getElementById('rosterModal').style.display = 'flex';
+        await fetchAndRenderRosterLedger();
+    }
+
+    function closeRosterLedgerModal() {
+        document.getElementById('rosterModal').style.display = 'none';
+    }
+
+    // Load active student records directly out of PostgreSQL Database
+    async function fetchAndRenderRosterLedger() {
+        const tbody = document.getElementById('rosterTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8;">Querying active ledger registers...</td></tr>';
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/students/roster');
+            const data = await response.json();
+
+            if (!data.success) {
+                tbody.innerHTML = `<tr><td colspan="7" style="color: #fca5a5; text-align: center;">Error parsing layout: ${data.error}</td></tr>`;
+                return;
+            }
+
+            if (data.roster.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b;">No active student records found in the system registry pool database.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.roster.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 700; color: #a78bfa;">${student.admission_no}</td>
+                    <td>${student.full_name}</td>
+                    <td>${student.gender}</td>
+                    <td>${student.school_section}</td>
+                    <td>${student.assigned_class}</td>
+                    <td>Arm ${student.assigned_arm}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteStudentRecord('${student.admission_no}')">Expunge Record</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            tbody.innerHTML = '<tr><td colspan="7" style="color: #ef4444; text-align: center;">Network connection layer read fault execution crash.</td></tr>';
+        }
+    }
+
+    // Terminate entry from table
+    async function deleteStudentRecord(admissionNo) {
+        if (!confirm(`Are you certain you want to completely remove record profile [${admissionNo}] from the master repository ledger? This action is irreversible.`)) return;
+
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/api/students/remove/${encodeURIComponent(admissionNo)}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                await fetchAndRenderRosterLedger(); // Refresh View mapping instantly
+            } else {
+                alert(`Registry Lockout: ${data.error}`);
+            }
+        } catch (err) {
+            alert("Failed to submit row termination command sequence tracking packet.");
+        }
+    }
+
+    function handleLogout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+</script>
+</body>
+</html>

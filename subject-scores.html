@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Grade Registry</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMenu()"></div>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Teacher Portal</h3>
+                <button class="close-menu-btn" onclick="toggleSidebarMenu()">×</button>
+            </div>
+            <nav class="nav-links">
+                <a href="subject-scores.html" class="active">Grade Registry</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Portal</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="hamburger-menu-btn" onclick="toggleSidebarMenu()">☰</button>
+                    <h2 id="welcomeTeacherHeader">Welcome, Subject Teacher</h2>
+                </div>
+                <div class="school-badge">Term Session: 2025/2026</div>
+            </header>
+
+            <section class="action-hub" style="margin-top: 24px; background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+                <h3>Grade Entry Parameters</h3>
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Select your assigned class stream and choose the specific assessment component to open the recording sheets.</p>
+                
+                <div class="selector-grid">
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="color: #f1f5f9; font-weight: 600;">Choose Target Class Stream</label>
+                        <select id="teacherAllocationSelector" style="background: #0f172a; color: #fff; padding: 12px; border: 1px solid #475569; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                            <option value="" disabled selected>-- Syncing live matrix data... --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                        <label style="color: #f1f5f9; font-weight: 600;">Choose Assessment Component</label>
+                        <select id="assessmentTypeSelector" disabled style="background: #0f172a; color: #fff; padding: 12px; border: 1px solid #475569; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                            <option value="" disabled selected>-- Select Class Stream First --</option>
+                            <option value="ca_1">1st Continuous Assessment (Max 10)</option>
+                            <option value="ca_2">2nd Continuous Assessment (Max 10)</option>
+                            <option value="ca_3">3rd Continuous Assessment (Max 20)</option>
+                            <option value="exam">Term Examination (Max 60)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section id="studentGradeSheetWrapper" style="display: none; margin-top: 24px;">
+                <div style="background: #1e293b; padding: 24px; border-radius: 8px; border: 1px solid #334155;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 id="currentSheetTitle" style="margin: 0; color: #fff;">Student Roster Manifest</h3>
+                            <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;" id="assessmentHintText">Enter performance assessment scores.</p>
+                        </div>
+                        <button type="button" onclick="commitClassScoresBatch()" style="background: #a78bfa; color: #0f172a; font-weight: 700; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                            Save Academic Scores
+                        </button>
+                    </div>
+
+                    <table class="scores-table" style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+                        <thead>
+                            <tr style="text-align: left; color: #94a3b8;">
+                                <th style="padding: 10px;">Admission ID</th>
+                                <th style="padding: 10px;">Student Name</th>
+                                <th style="padding: 10px;">Gender</th>
+                                <th id="dynamicScoreHeader" style="text-align: center; color: #a78bfa; font-weight: 700; width: 180px; padding: 10px;">Score Entry</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentScoresTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let authenticatedTeacher = null;
+
+        function toggleSidebarMenu() {
+            document.getElementById('dashboardSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // Authentication & Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('teacherToken');
+            const role = localStorage.getItem('portalRole');
+
+            if (!token || role !== 'Subject Teacher') {
+                alert("Access Denied: Please authenticate through the gateway page portal.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            authenticatedTeacher = JSON.parse(token);
+            document.getElementById('welcomeTeacherHeader').innerText = `Welcome, ${authenticatedTeacher.name}`;
+            
+            // Trigger our dynamic live allocations checker directly
+            populateAllocationDropdown();
+        });
+
+        // Step 1: Query the database directly for live allocations linked to the logged-in teacher
+        async function populateAllocationDropdown() {
+            const selector = document.getElementById('teacherAllocationSelector');
+            if (!selector) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/teachers/live-allocations?email=${encodeURIComponent(authenticatedTeacher.email)}`);
+                const data = await response.json();
+
+                if (data.success && data.allocations.length > 0) {
+                    selector.innerHTML = '<option value="" disabled selected>-- Choose Target Class Stream --</option>';
+                    data.allocations.forEach((alloc) => {
+                        const displayOptionText = `${alloc.subject_name} — ${alloc.assigned_class} ${alloc.assigned_arm}`;
+                        const optionElement = document.createElement('option');
+                        optionElement.value = JSON.stringify(alloc);
+                        optionElement.textContent = displayOptionText;
+                        selector.appendChild(optionElement);
+                    });
+                } else {
+                    selector.innerHTML = '<option value="" disabled>No active subject configurations found for your account.</option>';
+                }
+            } catch (err) {
+                console.error("Live sync failure:", err);
+                selector.innerHTML = '<option value="" disabled>Error loading live classroom streams.</option>';
+            }
+        }
+
+        // Trigger step 2 when the class selection changes
+        document.getElementById('teacherAllocationSelector').addEventListener('change', () => {
+            const assessmentSelector = document.getElementById('assessmentTypeSelector');
+            assessmentSelector.disabled = false;
+            assessmentSelector.selectedIndex = 0; // Reset evaluation choice
+            document.getElementById('studentGradeSheetWrapper').style.display = "none";
+        });
+
+        // Step 2: Fetch student profiles when assessment column selection changes
+        document.getElementById('assessmentTypeSelector').addEventListener('change', async (e) => {
+            const classSelector = document.getElementById('teacherAllocationSelector');
+            const selectedAllocation = JSON.parse(classSelector.value);
+            const scoreFieldColumn = e.target.value; 
+
+            // Dynamic Form UI Column Labels
+            const columnLabelMap = {
+                'ca_1': { header: '1st CA Score (10)', max: 10, hint: 'Recording Marks for continuous evaluation 1. Maximum threshold limit: 10 Marks.' },
+                'ca_2': { header: '2nd CA Score (10)', max: 10, hint: 'Recording Marks for continuous evaluation 2. Maximum threshold limit: 10 Marks.' },
+                'ca_3': { header: '3rd CA Score (20)', max: 20, hint: 'Recording Marks for continuous evaluation 3. Maximum threshold limit: 20 Marks.' },
+                'exam': { header: 'Term Exam Score (60)', max: 60, hint: 'Recording Marks for Final examination sheet. Maximum threshold limit: 60 Marks.' }
+            };
+
+            const config = columnLabelMap[scoreFieldColumn];
+            document.getElementById('dynamicScoreHeader').innerText = config.header;
+            document.getElementById('assessmentHintText').innerText = config.hint;
+            document.getElementById('currentSheetTitle').innerText = `${selectedAllocation.subject_name} — ${selectedAllocation.assigned_class} ${selectedAllocation.assigned_arm}`;
+
+            const tableBody = document.getElementById('studentScoresTableBody');
+            const sheetWrapper = document.getElementById('studentGradeSheetWrapper');
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/subject-teacher/dossier-roster?classTier=${encodeURIComponent(selectedAllocation.assigned_class)}&classArm=${encodeURIComponent(selectedAllocation.assigned_arm)}&subjectName=${encodeURIComponent(selectedAllocation.subject_name)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    tableBody.innerHTML = "";
+                    if (data.students.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #f87171; padding: 20px;">No students have been enrolled into this class stream yet.</td></tr>`;
+                    } else {
+                        data.students.forEach(student => {
+                            const existingScore = student[scoreFieldColumn];
+                            const inputScoreValue = (existingScore !== null && existingScore !== undefined) ? existingScore : '';
+
+                            tableBody.innerHTML += `
+                                <tr data-admission-id="${student.admission_id}" style="border-bottom: 1px solid #334155;">
+                                    <td style="padding: 12px;"><code>${student.admission_id}</code></td>
+                                    <td style="padding: 12px;">${student.last_name.toUpperCase()}, ${student.first_name}</td>
+                                    <td style="padding: 12px;">${student.gender}</td>
+                                    <td style="text-align: center; padding: 12px;">
+                                        <input type="number" class="score-input segment-mark" 
+                                               min="0" max="${config.max}" step="0.1" 
+                                               value="${inputScoreValue}" 
+                                               placeholder="Max ${config.max}"
+                                               style="background: #0f172a; color: #fff; border: 1px solid #475569; padding: 6px; border-radius: 4px; text-align: center; width: 100px;">
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    sheetWrapper.style.display = "block";
+                }
+            } catch (err) {
+                console.error("Roster compilation communication fault:", err);
+                alert("Network Fault: Could not fetch student records from backend.");
+            }
+        });
+
+        // Step 3: Compile and transmit the modified score parameters
+        async function commitClassScoresBatch() {
+            const classSelector = document.getElementById('teacherAllocationSelector');
+            const assessmentSelector = document.getElementById('assessmentTypeSelector');
+            
+            const selectedAllocation = JSON.parse(classSelector.value);
+            const scoreFieldColumn = assessmentSelector.value;
+
+            const rows = document.querySelectorAll('#studentScoresTableBody tr');
+            const scoresPayload = [];
+            
+            let validationTriggered = false;
+            const maxThresholdMap = { 'ca_1': 10, 'ca_2': 10, 'ca_3': 20, 'exam': 60 };
+            const maxLimit = maxThresholdMap[scoreFieldColumn] || 100;
+
+            rows.forEach(row => {
+                const admissionId = row.getAttribute('data-admission-id');
+                if (!admissionId) return;
+
+                const inputField = row.querySelector('.segment-mark');
+                const rawValue = inputField.value;
+                const numericalMark = rawValue === "" ? null : parseFloat(rawValue);
+
+                if (numericalMark !== null && (numericalMark < 0 || numericalMark > maxLimit)) {
+                    inputField.style.borderColor = "#f87171";
+                    validationTriggered = true;
+                } else {
+                    inputField.style.borderColor = "#475569";
+                }
+
+                scoresPayload.push({
+                    admissionId: admissionId,
+                    scoreValue: numericalMark
+                });
+            });
+
+            if (validationTriggered) {
+                alert(`Validation Alert: Some values exceed the maximum threshold limit of ${maxLimit} marks. Please verify entries.`);
+                return;
+            }
+
+            const bodyData = {
+                subjectName: selectedAllocation.subject_name,
+                classTier: selectedAllocation.assigned_class,
+                classArm: selectedAllocation.assigned_arm,
+                scoreColumn: scoreFieldColumn, 
+                scores: scoresPayload
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/subject-teacher/save-dossier-scores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bodyData)
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert("Academic Ledger Matrix Updated successfully!");
+                } else {
+                    alert(`Transaction Failed: ${data.error}`);
+                }
+            } catch (err) {
+                console.error("Save pipeline processing failure:", err);
+                alert("Network error updating database tracking records.");
+            }
+        }
+    </script>
+
+</body>
+</html>

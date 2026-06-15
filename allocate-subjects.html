@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Subject Allocation Framework</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .roster-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e293b; border-radius: 6px; overflow: hidden; }
+        .roster-table th, .roster-table td { padding: 14px; text-align: left; border-bottom: 1px solid #334155; color: #f1f5f9; font-size: 14px; }
+        .roster-table th { background: #0f172a; color: #a78bfa; font-weight: 600; }
+        .roster-table tr:hover { background: #1e293bce; }
+        
+        /* Checkbox Container Panel Styling */
+        .subject-checkbox-grid {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .checkbox-item:hover {
+            background: #1e293b;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #a78bfa;
+            cursor: pointer;
+        }
+        
+        /* Custom Scrollbar for Subject Panel */
+        .subject-checkbox-grid::-webkit-scrollbar { width: 6px; }
+        .subject-checkbox-grid::-webkit-scrollbar-track { background: #0f172a; }
+        .subject-checkbox-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .notice-placeholder {
+            grid-column: 1 / -1;
+            color: #94a3b8;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMenu()"></div>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+                <button class="close-menu-btn" onclick="toggleSidebarMenu()">×</button>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="allocate-subjects.html" class="active">Subject Allocation Framework</a>
+                <a href="assign-teachers.html">Assign Form Teachers</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="hamburger-menu-btn" onclick="toggleSidebarMenu()">☰</button>
+                    <h2>Subject Allocation Framework</h2>
+                </div>
+                <div class="school-badge">Active Session: 2025/2026</div>
+            </header>
+
+            <section class="setup-grid" style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px;">
+                
+                <div class="panel" style="background: #1e293b; padding: 24px; border-radius: 8px; border: 1px solid #334155;">
+                    <h3>Map Curricula to Sectional Streams</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+                        First, choose a primary or specialized secondary section track. The system will load targeted classes and generate proper checkbox matrices dynamically.
+                    </p>
+
+                    <form id="subjectAllocationForm" style="display: flex; flex-direction: column; gap: 16px;">
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: #f1f5f9; font-weight: 600;">School Section</label>
+                                <select id="schoolSection" required onchange="handleSectionChange()" style="background: #0f172a; color: #fff; padding: 10px; border: 1px solid #475569; border-radius: 4px;">
+                                    <option value="" disabled selected>Select Track Section</option>
+                                    <option value="Primary School">Primary School</option>
+                                    <option value="Junior Secondary">Junior Secondary</option>
+                                    <option value="Senior Secondary (Science)">Senior Secondary (Science)</option>
+                                    <option value="Senior Secondary (Arts)">Senior Secondary (Arts)</option>
+                                    <option value="Senior Secondary (Commercial)">Senior Secondary (Commercial)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: #f1f5f9; font-weight: 600;">Class Tier</label>
+                                <select id="allocationTier" required disabled style="background: #0f172a; color: #fff; padding: 10px; border: 1px solid #475569; border-radius: 4px;">
+                                    <option value="" disabled selected>Select Section First</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: #f1f5f9; font-weight: 600;">Class Arm</label>
+                                <select id="allocationArm" required style="background: #0f172a; color: #fff; padding: 10px; border: 1px solid #475569; border-radius: 4px;">
+                                    <option value="" disabled selected>Select Arm</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: #f1f5f9; font-weight: 600;">Available Curriculum Subjects</label>
+                            <div class="subject-checkbox-grid" id="subjectCheckboxContainer">
+                                <div class="notice-placeholder">Please choose a school section above to compile available subject logs.</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-action" style="margin-top: 10px; background: #a78bfa; color: #0f172a; font-weight: 700; border: none; padding: 12px; border-radius: 4px; cursor: pointer;">
+                            Commit Allocation Framework
+                        </button>
+                    </form>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Structured School Curriculum Repository Object Map
+        const curriculumRepository = {
+            "Primary School": {
+                classes: ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"],
+                subjects: [
+                    "English Language", "Mathematics", "Basic Science and Technology", "National Values", 
+                    "Civic Education", "Social Studies", "Cultural and Creative Arts (CCA)", "Computer Studies", 
+                    "Physical and Health Education (PHE)", "Agricultural Science", "Home Economics", 
+                    "French Language", "Christian Religious Studies (CRS)", "Islamic Religious Studies (IRS)", 
+                    "Nigerian Language", "Verbal Reasoning", "Quantitative Reasoning", "Security Education", "Handwriting"
+                ]
+            },
+            "Junior Secondary": {
+                classes: ["JSS 1", "JSS 2", "JSS 3"],
+                subjects: [
+                    "English Studies", "Mathematics", "Basic Science", "Basic Technology", "Social Studies", 
+                    "Civic Education", "Security Education", "Computer Studies", "Business Studies", 
+                    "Agricultural Science", "Home Economics", "Cultural and Creative Arts (CCA)", 
+                    "Physical and Health Education (PHE)", "French Language", "Christian Religious Studies (CRS)", 
+                    "Islamic Religious Studies (IRS)", "Nigerian Language"
+                ]
+            },
+            "Senior Secondary (Science)": {
+                classes: ["SSS 1", "SSS 2", "SSS 3"],
+                subjects: [
+                    "English Language", "Mathematics", "Physics", "Chemistry", "Biology", 
+                    "Further Mathematics", "Agricultural Science", "Geography", "Civic Education", 
+                    "Computer Science", "Data Processing"
+                ]
+            },
+            "Senior Secondary (Arts)": {
+                classes: ["SSS 1", "SSS 2", "SSS 3"],
+                subjects: [
+                    "English Language", "Mathematics", "Literature in English", "Government", "History", 
+                    "Christian Religious Studies", "Islamic Religious Studies", "Geography", 
+                    "French Language", "Fine Arts", "Music", "Civic Education"
+                ]
+            },
+            "Senior Secondary (Commercial)": {
+                classes: ["SSS 1", "SSS 2", "SSS 3"],
+                subjects: [
+                    "English Language", "Mathematics", "Economics", "Financial Accounting", "Commerce", 
+                    "Marketing", "Office Practice", "Data Processing", "Computer Science", "Civic Education", "Geography"
+                ]
+            }
+        };
+
+        // Handles reactive drop-down UI updates and checkbox rendering
+        function handleSectionChange() {
+            const sectionSelected = document.getElementById('schoolSection').value;
+            const tierSelect = document.getElementById('allocationTier');
+            const checkboxContainer = document.getElementById('subjectCheckboxContainer');
+
+            // Reset and enable Class Tier Dropdown
+            tierSelect.innerHTML = '<option value="" disabled selected>Select Tier</option>';
+            tierSelect.disabled = false;
+
+            if (!curriculumRepository[sectionSelected]) return;
+
+            // Populate Tier Values
+            curriculumRepository[sectionSelected].classes.forEach(cls => {
+                const opt = document.createElement('option');
+                opt.value = cls;
+                opt.textContent = cls;
+                tierSelect.appendChild(opt);
+            });
+
+
+            // Double check the column names inside your server.js route loop:
+const cascadeDossierQuery = `
+    INSERT INTO academic_dossiers (admission_id, subject_name, class_tier, class_arm, school_section)
+    SELECT se.admission_id, $1, se.class_tier, se.class_arm, $4
+    FROM student_enrollments se
+    WHERE se.class_tier = $2 AND se.class_arm = $3
+    ON CONFLICT (admission_id, subject_name) DO NOTHING;
+`;
+
+            // Populate Subject Checkboxes Matrix
+            checkboxContainer.innerHTML = '';
+            curriculumRepository[sectionSelected].subjects.forEach(subject => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = subject;
+                
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(` ${subject}`));
+                checkboxContainer.appendChild(label);
+            });
+        }
+
+        function toggleSidebarMenu() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // Dedicated Sectional Batch Form Submission Handling Link
+        document.getElementById('subjectAllocationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const schoolSection = document.getElementById('schoolSection').value;
+            const classTier = document.getElementById('allocationTier').value;
+            const classArm = document.getElementById('allocationArm').value;
+
+            const checkedBoxes = document.querySelectorAll('#subjectCheckboxContainer input[type="checkbox"]:checked');
+            
+            if (checkedBoxes.length === 0) {
+                return alert("Allocation Notice: Please tick at least one subject box before saving.");
+            }
+
+            const subjectNames = Array.from(checkedBoxes).map(box => box.value);
+
+            const payload = {
+                schoolSection: schoolSection,
+                classTier: classTier,
+                classArm: classArm,
+                subjectNames: subjectNames
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/admin/allocate-subject-batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Success: ${subjectNames.length} subject(s) successfully mapped to ${classTier} ${classArm} (${schoolSection})!`);
+                    
+                    document.getElementById('subjectAllocationForm').reset();
+                    document.getElementById('allocationTier').innerHTML = '<option value="" disabled selected>Select Section First</option>';
+                    document.getElementById('allocationTier').disabled = true;
+                    document.getElementById('subjectCheckboxContainer').innerHTML = '<div class="notice-placeholder">Please choose a school section above to compile available subject logs.</div>';
+                } else {
+                    alert(`Allocation Notice: ${data.error}`);
+                }
+            } catch (err) {
+                console.error("Framework matrix communication fault:", err);
+                alert("Network Error: Could not execute sectional batch transaction on database manager.");
+            }
+        });
+    </script>
+</body>
+</html>

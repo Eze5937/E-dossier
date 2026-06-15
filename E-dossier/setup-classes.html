@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Set Up Class Arms</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Unified Left Sidebar Navigation Menu -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="setup-classes.html" class="active">Class Frameworks</a>
+                <a href="assign-teachers.html">Assign Form Teachers</a>
+                <a href="index.html" class="logout-link">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            <header class="dash-header">
+                <h2>School Structure Framework</h2>
+                <a href="dashboard.html" class="back-link">← Return to Dashboard</a>
+            </header>
+
+            <div class="setup-grid">
+                <!-- Left Column: Add Class Arm Form -->
+                <div class="panel">
+                    <h3>Initialize Class Stream</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin-top: -8px; margin-bottom: 20px;">
+                        Define a new academic group block for this session cycle.
+                    </p>
+                    
+                    <form id="assignTeacherForm">
+    <input type="text" id="teacherName" placeholder="Teacher Full Name" required>
+    <input type="email" id="teacherEmail" placeholder="Email Address" required>
+    <input type="password" id="teacherPassword" placeholder="Access Password" required>
+    <input type="text" id="classTier" placeholder="e.g. SSS 1" required>
+    <input type="text" id="classArm" placeholder="e.g. Science A" required>
+    
+    <button type="submit">Assign & Save Teacher</button>
+</form>
+
+<script>
+    // This ID must exactly match the form id above!
+    document.getElementById('assignTeacherForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            name: document.getElementById('teacherName').value,
+            email: document.getElementById('teacherEmail').value,
+            password: document.getElementById('teacherPassword').value,
+            classTier: document.getElementById('classTier').value,
+            classArm: document.getElementById('classArm').value
+        };
+
+        try {
+            const response = await fetch('http://localhost:5000/api/teachers/assign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload(); // Reloads to show update
+            } else {
+                alert('Database Insertion Error: ' + data.error);
+            }
+        } catch (error) {
+            alert('Cannot reach backend engine.');
+        }
+    });
+</script>
+                </div>
+
+                <!-- Right Column: Visual School Structure Map -->
+                <div class="panel">
+                    <h3>Active School Infrastructure Map</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin-top: -8px; margin-bottom: 24px;">
+                        The current structured arms initialized within your e-Dossier portal workspace.
+                    </p>
+                    
+                    <div id="classMapContainer" class="class-map-grid">
+                        <!-- Prototype Baseline Data Card Layouts (Will be managed dynamically by front-end loop) -->
+                        <div class="class-card">
+                            <div class="class-card-header">JSS 1</div>
+                            <div class="class-card-body">
+                                <span class="arm-pill">A</span>
+                                <span class="arm-pill">B</span>
+                            </div>
+                        </div>
+
+                        <div class="class-card">
+                            <div class="class-card-header">SSS 1</div>
+                            <div class="class-card-body">
+                                <span class="arm-pill">Science A</span>
+                                <span class="arm-pill">Commercial</span>
+                                <span class="arm-pill">Arts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Front-End Simulation Interaction Script -->
+    <script>
+        // Grab the form element from your page
+const classForm = document.getElementById('classSetupForm'); // Make sure your HTML <form> has this id!
+
+if (classForm) {
+    classForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Stop the page from refreshing layout
+
+        // Gather input values from your form fields
+        const tierValue = document.getElementById('classTier').value; // e.g., 'SSS 1'
+        const armValue = document.getElementById('classArm').value;   // e.g., 'Science A'
+
+        try {
+            // Send the data package down to our live Node.js server loop
+            const response = await fetch('http://localhost:5000/api/classes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tier: tierValue,
+                    arm: armValue
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Success! Class stream saved to your PostgreSQL database!');
+                classForm.reset(); // Clear the form input bars
+            } else {
+                alert('Database Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Transmission fault:', error);
+            alert('Failed to connect to the backend server engine.');
+        }
+    });
+}
+        // Mock temporary registry tracking all created school arms
+        let schoolStructureRegistry = [
+            { tier: "JSS 1", arm: "A" },
+            { tier: "JSS 1", arm: "B" },
+            { tier: "SSS 1", arm: "Science A" },
+            { tier: "SSS 1", arm: "Commercial" },
+            { tier: "SSS 1", arm: "Arts" }
+        ];
+
+        // Function to rebuild the school layout map visually based on our data array
+        function renderSchoolStructureMap() {
+            const container = document.getElementById('classMapContainer');
+            container.innerHTML = ""; // Clear current visual blocks
+
+            // Group our plain data registry array items by their Class Tiers cleanly
+            const groupedTiers = {};
+            schoolStructureRegistry.forEach(item => {
+                if (!groupedTiers[item.tier]) {
+                    groupedTiers[item.tier] = [];
+                }
+                groupedTiers[item.tier].push(item.arm);
+            });
+
+            // Standard tiers to display chronological order from JSS1 down to SSS3
+            const orderOfTiers = ["JSS 1", "JSS 2", "JSS 3", "SSS 1", "SSS 2", "SSS 3"];
+
+            orderOfTiers.forEach(tier => {
+                // If this specific tier grade has initialized arms, create its dashboard panel card
+                if (groupedTiers[tier]) {
+                    let armPillsHTML = groupedTiers[tier].map(arm => `<span class="arm-pill">${arm}</span>`).join('');
+                    
+                    const cardHTML = `
+                        <div class="class-card">
+                            <div class="class-card-header">${tier}</div>
+                            <div class="class-card-body">
+                                ${armPillsHTML}
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', cardHTML);
+                }
+            });
+
+            // If completely wiped or empty
+            if (schoolStructureRegistry.length === 0) {
+                container.innerHTML = `<div style="color: #64748b; text-align: center; grid-column: span 2; padding: 40px 0;">No active class streams initialized yet.</div>`;
+            }
+        }
+
+        // Catch form submissions to spawn new arms on the fly
+        document.getElementById('classSetupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const tierInput = document.getElementById('baseTier').value;
+            const armInput = document.getElementById('armName').value.trim();
+
+            // Simple duplicates check rule
+            const isDuplicate = schoolStructureRegistry.some(item => item.tier === tierInput && item.arm.toLowerCase() === armInput.toLowerCase());
+
+            if (isDuplicate) {
+                alert(`Configuration Conflict: ${tierInput} [${armInput}] has already been registered inside your layout mapping.`);
+                return;
+            }
+
+            // Push into local structural data object array
+            schoolStructureRegistry.push({ tier: tierInput, arm: armInput });
+            
+            // Re-render display layout maps instantly
+            renderSchoolStructureMap();
+            
+            // Clean interface input fields
+            document.getElementById('armName').value = "";
+        });
+
+        // Initialize display mapping layouts on base code file run
+        renderSchoolStructureMap();
+    </script>
+</body>
+</html>

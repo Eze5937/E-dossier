@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier Setup</title>
+    
+    <!-- This line tells the HTML to look right next to it for the styles file -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h2>Initialize E-Dossier</h2>
+            <p>Set up your institution's digital student record system.</p>
+            
+            <form action="dashboard.html" method="GET">
+                <div class="form-group">
+                    <label>School Name</label>
+                    <input type="text" placeholder="e.g., Bright Stars Academy" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Workspace Subdomain</label>
+                    <input type="text" placeholder="brightstars" required>
+                </div>
+                
+                <button type="submit">Deploy Portal Workspace</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

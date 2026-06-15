@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Subject Allocation Framework</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .roster-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e293b; border-radius: 6px; overflow: hidden; }
+        .roster-table th, .roster-table td { padding: 14px; text-align: left; border-bottom: 1px solid #334155; color: #f1f5f9; font-size: 14px; }
+        .roster-table th { background: #0f172a; color: #a78bfa; font-weight: 600; }
+        .roster-table tr:hover { background: #1e293bce; }
+        
+        /* Checkbox Container Panel Styling */
+        .subject-checkbox-grid {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 16px;
+            max-height: 260px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .checkbox-item:hover {
+            background: #1e293b;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #a78bfa;
+            cursor: pointer;
+        }
+        
+        /* Custom Scrollbar for Subject Panel */
+        .subject-checkbox-grid::-webkit-scrollbar { width: 6px; }
+        .subject-checkbox-grid::-webkit-scrollbar-track { background: #0f172a; }
+        .subject-checkbox-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMenu()"></div>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+                <button class="close-menu-btn" onclick="toggleSidebarMenu()">×</button>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="allocate-subjects.html" class="active">Subject Allocation Framework</a>
+                <a href="assign-teachers.html">Assign Form Teachers</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="hamburger-menu-btn" onclick="toggleSidebarMenu()">☰</button>
+                    <h2>Subject Allocation Framework</h2>
+                </div>
+                <div class="school-badge">Active Session: 2025/2026</div>
+            </header>
+
+            <section class="setup-grid" style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px;">
+                
+                <div class="panel" style="background: #1e293b; padding: 24px; border-radius: 8px; border: 1px solid #334155;">
+                    <h3>Map Curricula to Class Streams</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+                        Select multiple subject checkboxes for your chosen class tier and stream. Allocating will link records across the ledger system automatically.
+                    </p>
+
+                    <form id="subjectAllocationForm" style="display: flex; flex-direction: column; gap: 16px;">
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: #f1f5f9; font-weight: 600;">Class Tier</label>
+                                <select id="allocationTier" required style="background: #0f172a; color: #fff; padding: 10px; border: 1px solid #475569; border-radius: 4px;">
+                                    <option value="" disabled selected>Select Tier</option>
+                                    <option value="SSS 1">SSS 1</option>
+                                    <option value="SSS 2">SSS 2</option>
+                                    <option value="SSS 3">SSS 3</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: #f1f5f9; font-weight: 600;">Class Arm</label>
+                                <select id="allocationArm" required style="background: #0f172a; color: #fff; padding: 10px; border: 1px solid #475569; border-radius: 4px;">
+                                    <option value="" disabled selected>Select Arm</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: #f1f5f9; font-weight: 600;">Select Subjects to Map</label>
+                            <div class="subject-checkbox-grid" id="subjectCheckboxContainer">
+                                <label class="checkbox-item"><input type="checkbox" value="Mathematics"> Mathematics</label>
+                                <label class="checkbox-item"><input type="checkbox" value="English Language"> English Language</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Further Mathematics"> Further Mathematics</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Biology"> Biology</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Chemistry"> Chemistry</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Physics"> Physics</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Agricultural Science"> Agricultural Science</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Geography"> Geography</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Technical Drawing"> Technical Drawing</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Literature-in-English"> Literature-in-English</label>
+                                <label class="checkbox-item"><input type="checkbox" value="History"> History</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Government"> Government</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Economics"> Economics</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Christian Religious Studies"> Christian Religious Studies</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Islamic Religious Studies"> Islamic Religious Studies</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Civic Education"> Civic Education</label>
+                                <label class="checkbox-item"><input type="checkbox" value="French Language"> French Language</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Data Processing"> Data Processing</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Garment Making"> Garment Making</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Catering Craft Practice"> Catering Craft Practice</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-action" style="margin-top: 10px; background: #a78bfa; color: #0f172a; font-weight: 700; border: none; padding: 12px; border-radius: 4px; cursor: pointer;">
+                            Commit Allocation Framework
+                        </button>
+                    </form>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebarMenu() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // Dedicated Batch Form Submission Handler
+        document.getElementById('subjectAllocationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const classTier = document.getElementById('allocationTier').value;
+            const classArm = document.getElementById('allocationArm').value;
+
+            // 1. Scan checked nodes inside the grid box container
+            const checkedBoxes = document.querySelectorAll('#subjectCheckboxContainer input[type="checkbox"]:checked');
+            
+            // Validation: Make sure at least one subject box was selected
+            if (checkedBoxes.length === 0) {
+                return alert("Allocation Notice: Please tick at least one subject box before saving.");
+            }
+
+            // 2. Extract string values into a simple data array list
+            const subjectNames = Array.from(checkedBoxes).map(box => box.value);
+
+            // 3. Build batch allocation payload template
+            const payload = {
+                classTier: classTier,
+                classArm: classArm,
+                subjectNames: subjectNames // Sending array instead of a single string
+            };
+
+            try {
+                // 4. Dispatch transaction payload directly to backend
+                const response = await fetch('http://127.0.0.1:5000/api/admin/allocate-subject-batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Success: ${subjectNames.length} subject(s) successfully mapped to ${classTier} ${classArm}!`);
+                    
+                    // 5. Instantly clear form entries, uncheck all grid nodes, and refresh interface context
+                    document.getElementById('subjectAllocationForm').reset();
+                    checkedBoxes.forEach(box => box.checked = false);
+                } else {
+                    alert(`Allocation Notice: ${data.error}`);
+                }
+            } catch (err) {
+                console.error("Framework matrix communication fault:", err);
+                alert("Network Error: Could not execute batch transaction on database manager.");
+            }
+        });
+    </script>
+</body>
+</html>

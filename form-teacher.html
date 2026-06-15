@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Form Teacher Desk</title>
+    <style>
+        /* Modern Matrix Dashboard System Styling */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0b0f19; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+        
+        .dashboard-container { display: flex; min-height: 100vh; width: 100%; }
+        
+        /* Persistent Teacher Side Panel Navigation Frame */
+        .sidebar { 
+            width: 280px; 
+            background: #111827; 
+            padding: 24px; 
+            border-right: 2px solid #3b82f6; 
+            display: flex; 
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .profile-card { padding-bottom: 20px; border-bottom: 1px solid #1f2937; margin-bottom: 24px; }
+        .profile-card h3 { color: #3b82f6; font-size: 18px; font-weight: 700; text-transform: uppercase; }
+        .profile-card p { color: #9ca3af; font-size: 13px; margin-top: 4px; }
+        .class-badge { background: #1e3a8a; color: #60a5fa; padding: 4px 10px; border-radius: 4px; display: inline-block; font-size: 12px; font-weight: 700; margin-top: 8px; }
+
+        .nav-links { display: flex; flex-direction: column; gap: 8px; }
+        .nav-links a { color: #9ca3af; text-decoration: none; padding: 12px 16px; border-radius: 6px; font-size: 15px; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        .nav-links a:hover, .nav-links a.active { background: #1e3a8a; color: #ffffff; }
+        .nav-links .logout-link { margin-top: 60px; color: #f87171; }
+        .nav-links .logout-link:hover { background: #7f1d1d; color: #ffffff; }
+
+        /* Widescreen Main Viewport Framework */
+        .main-workspace { flex: 1; padding: 40px; width: 100%; overflow-y: auto; }
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #1f2937; padding-bottom: 20px; }
+        .workspace-header h2 { color: #ffffff; font-size: 26px; }
+        
+        /* Layout Configurations Panel Control Card */
+        .control-strip { background: #1f2937; border: 1px solid #374151; padding: 20px; border-radius: 8px; margin-bottom: 30px; display: flex; gap: 20px; align-items: flex-end; }
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+        .control-group label { color: #9ca3af; font-size: 13px; font-weight: 600; }
+        .control-group select { background: #0f172a; color: #ffffff; border: 1px solid #4b5563; padding: 10px; border-radius: 6px; min-width: 180px; font-size: 14px; }
+
+        /* Master Roster Layout Architecture Table */
+        .roster-card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; width: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+        .card-header { padding: 20px; background: #1f2937; border-bottom: 1px solid #374151; }
+        .card-header h4 { color: #60a5fa; font-size: 16px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 14px; border-bottom: 1px solid #1f2937; }
+        th { background: #0f172a; color: #9ca3af; font-weight: 600; }
+        tr:hover { background: #1f2937; }
+
+        .enroll-btn { background: #3b82f6; color: #ffffff; font-weight: 600; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s; font-size: 13px; }
+        .enroll-btn:hover { background: #2563eb; }
+        .enroll-btn:disabled { background: #4b5563; color: #9ca3af; cursor: not-allowed; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="profile-card">
+                <h3 id="formTeacherName">Loading Staff...</h3>
+                <p id="formTeacherEmail">email@school.com</p>
+                <div class="class-badge" id="assignedClassBadge">Scope Unassigned</div>
+            </div>
+            <nav class="nav-links">
+                <a class="active">My Classroom Intake</a>
+                <a href="dossier-manager.html">Academic Dossier Ledger</a>
+                <a onclick="handleLogout()" class="logout-link">Sign Out Entry</a>
+            </nav>
+        </aside>
+
+        <main class="main-workspace">
+            <div class="workspace-header">
+                <div>
+                    <h2>Form Teacher Command Terminal</h2>
+                    <p style="color: #9ca3af; font-size: 14px; margin-top: 4px;">Instantiate dossier tracking structures, lock assessment phases, and run grading sheets.</p>
+                </div>
+            </div>
+
+            <div class="control-strip">
+                <div class="control-group">
+                    <label>Target Academic Session</label>
+                    <select id="academicYearSelector">
+                        <option value="2025/2026" selected>2025/2026 Academic Session</option>
+                        <option value="2026/2027">2026/2027 Academic Session</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Target Term Tracking Zone</label>
+                    <select id="termSelector" onchange="evaluateTermSelectionState()">
+                        <option value="" disabled selected>-- Choose Active Term --</option>
+                        <option value="First Term">First Term</option>
+                        <option value="Second Term">Second Term</option>
+                        <option value="Third Term">Third Term</option>
+                    </select>
+                </div>
+                <p style="color: #9ca3af; font-size: 13px; font-style: italic; margin-bottom: 10px;">
+                    * You must choose an active tracking term above to enable Dossier Enrollment.
+                </p>
+            </div>
+
+            <div class="roster-card">
+                <div class="card-header">
+                    <h4 id="rosterTitleLabel">Active Classroom Student Roster Ledger</h4>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Admission ID Number</th>
+                            <th>Student Full Name</th>
+                            <th>Gender Tracking</th>
+                            <th>Active Configuration Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherRosterTableBody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #9ca3af; padding: 30px;">Loading classroom profile layout structures...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+<script>
+    
+    // Global Memory Matrix Reference Points
+    let cachedTeacherClass = "";
+    let cachedTeacherArm = "";
+
+    // Load active session flags on execution loop boot phase
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeFormTeacherIdentityScope();
+    });
+
+    function initializeFormTeacherIdentityScope() {
+    // 1. Pull the unified session payload object string
+    const sessionDataString = localStorage.getItem('teacherSession');
+
+    if (!sessionDataString) {
+        // Security Guard: If no valid token payload exists, redirect out to login instantly
+        alert("Security Redirect: Active session token missing. Please sign in.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    try {
+        // 2. Parse the JSON session payload into a readable object
+        const session = JSON.parse(sessionDataString);
+
+        // 3. Extract the correct fields exactly as sent by your server database gateway
+        const authName = session.name || 'Form Teacher Profile';
+        const authEmail = session.email || 'email@school.com';
+        cachedTeacherClass = session.assignedClass || '';
+        cachedTeacherArm = session.assignedArm || '';
+
+        // 4. Populate your beautiful UI layout layers dynamically
+        document.getElementById('formTeacherName').textContent = authName;
+        document.getElementById('formTeacherEmail').textContent = authEmail;
+        document.getElementById('assignedClassBadge').textContent = `Form: ${cachedTeacherClass} ${cachedTeacherArm}`;
+        document.getElementById('rosterTitleLabel').textContent = `Classroom Student Ledger Pool: Stream Room (${cachedTeacherClass} ${cachedTeacherArm})`;
+
+        // 5. Fire the dynamic data stream query across the network pool
+        fetchActiveRoomRoster();
+
+    } catch (parseError) {
+        console.error("Session profile stream parsing breakdown:", parseError);
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+}
+    async function fetchActiveRoomRoster() {
+        const tbody = document.getElementById('teacherRosterTableBody');
+        
+        try {
+            const url = `http://127.0.0.1:5000/api/form-teacher/my-roster?assignedClass=${encodeURIComponent(cachedTeacherClass)}&assignedArm=${encodeURIComponent(cachedTeacherArm)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!data.success || data.students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #6b7280; padding: 30px;">No student enrollments found matched inside your assigned class domain tracker.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.students.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #60a5fa;">${student.admission_no}</td>
+                    <td>${student.full_name}</td>
+                    <td>${student.gender}</td>
+                    <td>
+                        <button class="enroll-btn" name="enrollActions" disabled onclick="instantiateStudentDossier('${student.admission_no}')">
+                            Enroll For Dossier
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            evaluateTermSelectionState(); // Check if buttons need to remain toggled off
+        } catch (err) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f87171; padding: 30px;">Failed to link with data stream processing engines.</td></tr>';
+        }
+    }
+
+    // Toggle Action configuration buttons depending on active term choice rules state loops
+    function evaluateTermSelectionState() {
+        const selectedTerm = document.getElementById('termSelector').value;
+        const actionButtons = document.getElementsByName('enrollActions');
+
+        actionButtons.forEach(btn => {
+            btn.disabled = (selectedTerm === "");
+        });
+    }
+
+    // Route Command execution processing data packages out to backend services
+    async function instantiateStudentDossier(admissionNo) {
+        const term = document.getElementById('termSelector').value;
+        const session = document.getElementById('academicYearSelector').value;
+
+        const payload = {
+            admissionNo: admissionNo,
+            term: term,
+            academicYear: session,
+            studentClass: cachedTeacherClass
+        };
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/form-teacher/initialize-dossier', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert(`Success: ${data.message}`);
+            } else {
+                alert(`Allocation Engine Exception: ${data.error}`);
+            }
+        } catch (err) {
+            alert("Could not update dossier state metrics on server application layers.");
+        }
+    }
+
+    function handleLogout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+</script>
+</body>
+</html>

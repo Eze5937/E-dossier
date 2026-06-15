@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Staff Portal Login</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #0f172a; 
+            color: #f8fafc; 
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h2 {
+            color: #a78bfa;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .login-header p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .form-group input, .form-group select {
+            background: #0f172a;
+            color: #ffffff;
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #a78bfa;
+            outline: none;
+        }
+        .login-btn {
+            background: #a78bfa;
+            color: #0f172a;
+            font-weight: 700;
+            padding: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .login-btn:hover {
+            background: #c084fc;
+        }
+        .error-banner {
+            background: #7f1d1d;
+            border: 1px solid #f87171;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-header">
+            <h2>E-Dossier Portal</h2>
+            <p>Sign in to manage your students or record academic scores</p>
+        </div>
+
+        <div id="errorBanner" class="error-banner"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Portal Access Mode</label>
+                <select id="loginRole" required>
+                    <option value="Form Teacher">Form Teacher (Enrollment & Profiles)</option>
+                    <option value="Subject Teacher">Subject Teacher (CA & Marks Entry)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Official Email Address</label>
+                <input type="email" id="loginEmail" placeholder="name@school.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Portal Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="login-btn">Secure Login</button>
+        </form>
+    </div>
+
+    <script>
+        // FIXED: Wipes cache clean instantly on load to protect against crossover login data
+        // FIXED: Wipes cache clean instantly on load to protect against crossover login data
+localStorage.clear();
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Target the exact form ID from your HTML
+    const loginForm = document.getElementById('loginForm');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 2. Grab values matching your exact HTML input IDs
+            const roleValue = document.getElementById('loginRole').value;
+            const emailValue = document.getElementById('loginEmail').value;
+            const passwordValue = document.getElementById('loginPassword').value;
+
+            try {
+                // 3. Send credentials to your backend server auth engine
+                const response = await fetch('http://127.0.0.1:5000/api/auth/teacher-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailValue,
+                        password: passwordValue
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 4. Double check: Ensure database role matches what they selected in the dropdown
+                    if (data.token_payload.role !== roleValue) {
+                        alert(`Access Denied: Your database profile is registered as a "${data.token_payload.role}", but you selected "${roleValue}" mode.`);
+                        return;
+                    }
+
+                    // 5. Save the string token session to browser local memory
+                    localStorage.setItem('teacherSession', JSON.stringify(data.token_payload));
+                    
+                    // 6. Dynamic Routing Frame: Redirect them to their exact workspace portal
+                    if (roleValue === 'Form Teacher') {
+                        window.location.href = "form-teacher.html";
+                    } else if (roleValue === 'Subject Teacher') {
+                        window.location.href = "subject-teacher.html";
+                    }
+                    
+                } else {
+                    alert(`Authentication Denied: ${data.error}`);
+                }
+
+            } catch (networkError) {
+                console.error("Gateway connection error:", networkError);
+                alert("Network Error: Could not connect to the authentication server.");
+            }
+        });
+    } else {
+        console.error("Critical Layout Fault: <form id='loginForm'> was not found on this page.");
+    }
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Student Intake</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script>
+        // STRICT SECURITY GATEKEEPER: Validates session structure instantly before rendering DOM components
+        const savedToken = localStorage.getItem('teacherToken');
+        const userRole = localStorage.getItem('portalRole');
+
+        if (!savedToken || userRole !== 'Form Teacher') {
+            alert("Security Violation: Access Denied. Please authenticate through the login portal.");
+            window.location.href = 'teacher-login.html';
+        }
+    </script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" style="border-right-color: #4c1d95;">
+            <div class="logo-area">
+                <h3 style="color: #a78bfa;">Teacher Space</h3>
+                <div style="font-size: 14px; color: #94a3b8; margin-top: 10px; font-weight: 600;">
+                    Welcome, <span id="sidebarTeacherName" style="color: #ffffff;">Teacher</span>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="enroll-students.html" class="active" style="color: #a78bfa;">Classroom Intake</a>
+                <a href="#">Student E-Dossiers</a>
+                <a href="#">Continuous Assessments</a>
+                <a href="#" class="logout-link" style="color: #f87171;" onclick="handleLogout()">Exit Teacher Portal</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <h2>Student Intake Manager</h2>
+                <div class="school-badge" style="background-color: #4c1d95; color: #a78bfa;" id="classLockBadge">Classroom Locked</div>
+            </header>
+
+            <div class="setup-grid">
+                <div class="panel">
+                    <h3>Assigned Allocation Scope</h3>
+                    <div class="form-group">
+                        <label>Class Tier</label>
+                        <input type="text" id="lockedClassTier" readonly style="opacity: 0.8; background: #0f172a; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>Arm / Stream</label>
+                        <input type="text" id="lockedClassArm" readonly style="opacity: 0.8; background: #0f172a; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>Academic Calendar</label>
+                        <input type="text" value="2025/2026" readonly style="opacity: 0.5; background: #0f172a; cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div class="panel" style="overflow-x: auto;">
+                    <h3>Student Allocation Manifest</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin-top: -8px; margin-bottom: 24px;">
+                        Input entries for your assigned cohort listing below. 
+                    </p>
+                    
+                    <table id="rosterTable">
+                        <thead>
+                            <tr>
+                                <th>Admission ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Gender</th>
+                                <th>Date of Birth</th>
+                                <th style="text-align: center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterBody">
+                            <tr>
+                                <td><input type="text" placeholder="e.g., ADM-001" required></td>
+                                <td><input type="text" placeholder="John" required></td>
+                                <td><input type="text" placeholder="Doe" required></td>
+                                <td>
+                                    <select required style="background: #0f172a; color: white; border: 1px solid #334155; padding: 6px; border-radius: 4px;">
+                                        <option value="">Select</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </td>
+                                <td><input type="date" required style="background: #0f172a; color: white; border: 1px solid #334155; padding: 4px; border-radius: 4px;"></td>
+                                <td style="text-align: center;">
+                                    <button type="button" class="remove-btn" onclick="deleteRow(this)">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-actions" style="margin-top: 20px;">
+                        <button type="button" class="btn-secondary" onclick="appendNewRow()">+ Append Student Entry</button>
+                        <button type="button" class="btn-primary" style="background-color: #a78bfa; color: #0f172a;" onclick="compileAndSave()">Commit Batch Enrollment</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let teacherData = {};
+
+        // Run when HTML elements are safely mounted
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('teacherToken');
+            if (!savedToken) return; // Guard kicked out by head script early
+
+            teacherData = JSON.parse(savedToken);
+
+            // Populate workspace components dynamically with active teacher session
+            document.getElementById('sidebarTeacherName').innerText = teacherData.name;
+            document.getElementById('lockedClassTier').value = teacherData.assignedClass || 'N/A';
+            document.getElementById('lockedClassArm').value = teacherData.assignedArm || 'N/A';
+            document.getElementById('classLockBadge').innerText = `Active Session: ${teacherData.assignedClass} ${teacherData.assignedArm}`;
+            
+            console.log("Portal Session Verified for Form Teacher Account:", teacherData.email);
+        });
+
+        function appendNewRow() {
+            const tbody = document.getElementById('rosterBody');
+            const rowHTML = `
+                <tr>
+                    <td><input type="text" placeholder="Admission ID" required></td>
+                    <td><input type="text" placeholder="John" required></td>
+                    <td><input type="text" placeholder="Doe" required></td>
+                    <td>
+                        <select required style="background: #0f172a; color: white; border: 1px solid #334155; padding: 6px; border-radius: 4px;">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </td>
+                    <td><input type="date" required style="background: #0f172a; color: white; border: 1px solid #334155; padding: 4px; border-radius: 4px;"></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="remove-btn" onclick="deleteRow(this)">Remove</button>
+                    </td>
+                </tr>`;
+            tbody.insertAdjacentHTML('beforeend', rowHTML);
+        }
+
+        function deleteRow(button) {
+            const tbody = document.getElementById('rosterBody');
+            if (tbody.rows.length > 1) {
+                button.closest('tr').remove();
+            } else {
+                alert("Your manifest requires a minimum of one configuration row.");
+            }
+        }
+
+        // Handles gathering input fields and transmitting relational rows to Route 4 in server.js
+        async function compileAndSave() {
+            const rows = document.querySelectorAll('#rosterBody tr');
+            const studentList = [];
+            let validationCheck = true;
+
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const select = row.querySelector('select');
+                
+                const admissionId = inputs[0].value.trim();
+                const firstName   = inputs[1].value.trim();
+                const lastName    = inputs[2].value.trim();
+                const gender      = select.value;
+                const dob         = inputs[3] ? inputs[3].value : ''; 
+
+                if (!admissionId || !firstName || !lastName || !gender || !dob) {
+                    validationCheck = false;
+                } else {
+                    studentList.push({ admissionId, firstName, lastName, gender, dob });
+                }
+            });
+
+            if (!validationCheck) {
+                alert("Please fill out all visible fields (including Gender and Date of Birth) before committing.");
+                return;
+            }
+
+            // Fixed payload properties to match Route 4 parameters perfectly
+            const payload = {
+                classTier: teacherData.assignedClass,
+                classArm: teacherData.assignedArm,
+                enrolledByEmail: teacherData.email, 
+                students: studentList
+            };
+
+            try {
+                // FIXED: Route URL updated from /api/students/enroll-students to match your exact server.js Route 4 endpoint
+                const response = await fetch('http://127.0.0.1:5000/api/students/batch-enroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Batch Complete! ${data.count} students safely saved into registry.`);
+                    
+                    // Reset matrix layout cleanly down to a single pristine entry row
+                    document.getElementById('rosterBody').innerHTML = `
+                        <tr>
+                            <td><input type="text" placeholder="e.g., ADM-001" required></td>
+                            <td><input type="text" placeholder="John" required></td>
+                            <td><input type="text" placeholder="Doe" required></td>
+                            <td>
+                                <select required style="background: #0f172a; color: white; border: 1px solid #334155; padding: 6px; border-radius: 4px;">
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </td>
+                            <td><input type="date" required style="background: #0f172a; color: white; border: 1px solid #334155; padding: 4px; border-radius: 4px;"></td>
+                            <td style="text-align: center;">
+                                <button type="button" class="remove-btn" onclick="deleteRow(this)">Remove</button>
+                            </td>
+                        </tr>`;
+                } else {
+                    alert("Database submission failed: " + data.error);
+                }
+            } catch (error) {
+                console.error("Connection error:", error);
+                alert("Could not reach backend framework engine.");
+            }
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "teacher-login.html"; // Redirects smoothly to updated login template name
+        }
+    </script>
+</body>
+</html>

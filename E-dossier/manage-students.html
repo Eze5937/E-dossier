@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Dossier | Student Roster Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .roster-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e293b; border-radius: 6px; overflow: hidden; }
+        .roster-table th, .roster-table td { padding: 14px; text-align: left; border-bottom: 1px solid #334155; color: #f1f5f9; font-size: 14px; }
+        .roster-table th { background: #0f172a; color: #a78bfa; font-weight: 600; }
+        .roster-table tr:hover { background: #1e293bce; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 16px; }
+        .btn-download { background: #10b981; color: #fff; font-weight: 700; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background 0.2s; }
+        .btn-download:hover { background: #059669; }
+        .filter-panel { background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media(max-width: 768px) { .filter-panel { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMenu()"></div>
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="logo-area">
+                <h3>Admin Control</h3>
+                <button class="close-menu-btn" onclick="toggleSidebarMenu()">×</button>
+            </div>
+            <nav class="nav-links">
+                <a href="dashboard.html">Overview Panel</a>
+                <a href="allocate-subjects.html">Subject Allocation Framework</a>
+                <a href="assign-teachers.html">Assign Form Teachers</a>
+                <a href="manage-students.html" class="active">Student Rosters</a>
+                <a href="#" class="logout-link" onclick="handleLogout()">Exit Workspace</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dash-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="hamburger-menu-btn" onclick="toggleSidebarMenu()">☰</button>
+                    <h2>Student Registry Manifests</h2>
+                </div>
+                <div class="school-badge">Academic Session: 2025/2026</div>
+            </header>
+
+            <section style="margin-top: 24px;">
+                <div class="filter-panel">
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="color: #f1f5f9; font-weight: 600;">Class Tier</label>
+                        <select id="filterTier" onchange="fetchClassRoster()" style="background: #0f172a; color: #fff; padding: 12px; border: 1px solid #475569; border-radius: 4px; cursor: pointer;">
+                            <option value="" disabled selected>Select Tier</option>
+                            <option value="SSS 1">SSS 1</option>
+                            <option value="SSS 2">SSS 2</option>
+                            <option value="SSS 3">SSS 3</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="color: #f1f5f9; font-weight: 600;">Class Arm</label>
+                        <select id="filterArm" onchange="fetchClassRoster()" style="background: #0f172a; color: #fff; padding: 12px; border: 1px solid #475569; border-radius: 4px; cursor: pointer;">
+                            <option value="" disabled selected>Select Arm</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section id="rosterDisplayWrapper" style="display: none; margin-top: 24px;">
+                <div style="background: #1e293b; padding: 24px; border-radius: 8px; border: 1px solid #334155;">
+                    
+                    <div class="action-bar">
+                        <div>
+                            <h3 id="manifestTitle" style="margin: 0; color: #fff;">Class Roster</h3>
+                            <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Verified active student records pulled from institutional enrollment books.</p>
+                        </div>
+                        <button class="btn-download" onclick="downloadRosterExcel()">
+                            📥 Export Roster Sheet (.XLSX)
+                        </button>
+                    </div>
+
+                    <table class="roster-table">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>Admission ID</th>
+                                <th>Surname</th>
+                                <th>First Name</th>
+                                <th>Gender</th>
+                                <th>Date of Birth</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let currentClassData = []; 
+
+        function toggleSidebarMenu() {
+            document.getElementById('dashboardSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        async function fetchClassRoster() {
+            const tier = document.getElementById('filterTier').value;
+            const arm = document.getElementById('filterArm').value;
+
+            if (!tier || !arm) return; 
+
+            const tableBody = document.getElementById('rosterTableBody');
+            const wrapper = document.getElementById('rosterDisplayWrapper');
+            document.getElementById('manifestTitle').innerText = `${tier} ${arm} Student Manifest`;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/admin/class-roster?classTier=${encodeURIComponent(tier)}&classArm=${encodeURIComponent(arm)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentClassData = data.students;
+                    tableBody.innerHTML = "";
+
+                    if (currentClassData.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171; padding: 20px;">No students have been enrolled in ${tier} ${arm} yet.</td></tr>`;
+                    } else {
+                        currentClassData.forEach((student, index) => {
+                            const formattedDob = student.date_of_birth ? new Date(student.date_of_birth).toISOString().split('T')[0] : 'N/A';
+                            
+                            tableBody.innerHTML += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td><code>${student.admission_id}</code></td>
+                                    <td style="font-weight: 600; text-transform: uppercase;">${student.last_name}</td>
+                                    <td>${student.first_name}</td>
+                                    <td>${student.gender}</td>
+                                    <td>${formattedDob}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    wrapper.style.display = "block";
+                }
+            } catch (err) {
+                console.error("Roster retrieval fault:", err);
+                alert("Network Error: Failed to load class records from server.");
+            }
+        }
+
+        // UPGRADED EXCEL COMPILATION ENGINE
+        function downloadRosterExcel() {
+            if (currentClassData.length === 0) return alert("Cannot export an empty manifest.");
+
+            const tier = document.getElementById('filterTier').value;
+            const arm = document.getElementById('filterArm').value;
+
+            // 1. Build styled Spreadsheet structure XML payload
+            let xmlTemplate = `<?xml version="1.0" encoding="utf-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>E-Dossier Portal Engine</Author>
+  <Created>${new Date().toISOString()}</Created>
+ </DocumentProperties>
+ <Styles>
+  <Style ss:ID="HeaderStyle">
+   <Font ss:FontName="Segoe UI" ss:Size="11" ss:Color="#FFFFFF" ss:Bold="1"/>
+   <Interior ss:Color="#0F172A" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#4C1D95"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="DataStyle">
+   <Font ss:FontName="Segoe UI" ss:Size="10" ss:Color="#334155"/>
+   <Alignment ss:Vertical="Center"/>
+  </Style>
+  <Style ss:ID="CenterStyle">
+   <Font ss:FontName="Segoe UI" ss:Size="10" ss:Color="#334155"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Roster Manifest">
+  <Table>
+   <Column ss:Width="40"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="120"/>
+   <Column ss:Width="120"/>
+   <Column ss:Width="70"/>
+   <Column ss:Width="100"/>
+   
+   <Row ss:Height="24">
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">S/N</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Admission ID</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Surname</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">First Name</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Gender</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Date of Birth</Data></Cell>
+   </Row>`;
+
+            // 2. Loop through current data list and append XML Spreadsheet rows
+            currentClassData.forEach((student, index) => {
+                const dob = student.date_of_birth ? new Date(student.date_of_birth).toISOString().split('T')[0] : 'N/A';
+                
+                xmlTemplate += `
+   <Row ss:Height="18">
+    <Cell ss:StyleID="CenterStyle"><Data ss:Type="Number">${index + 1}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${student.admission_id}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${student.last_name.toUpperCase()}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${student.first_name}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${student.gender}</Data></Cell>
+    <Cell ss:StyleID="CenterStyle"><Data ss:Type="String">${dob}</Data></Cell>
+   </Row>`;
+            });
+
+            // 3. Finalize Workbook XML tags
+            xmlTemplate += `
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+            // 4. Convert structural payload into an octet stream Blob object
+            const blobData = new Blob([xmlTemplate], { type: "application/vnd.ms-excel" });
+            const urlString = window.URL.createObjectURL(blobData);
+            
+            // 5. Instantly trigger native browser download save routine
+            const downloadLink = document.createElement("a");
+            downloadLink.href = urlString;
+            downloadLink.download = `Student_Roster_${tier.replace(' ', '_')}_${arm}.xls`;
+            document.body.appendChild(downloadLink);
+            
+            downloadLink.click();
+            
+            // 6. Cleanup allocated DOM resources
+            document.body.removeChild(downloadLink);
+            window.URL.revokeObjectURL(urlString);
+        }
+    </script>
+</body>
+</html>

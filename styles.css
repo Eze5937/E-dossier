@@ -1,0 +1,681 @@
+/* Styling layout configurations */
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: #0f172a; /* Dark, slate-blue background */
+    color: #ffffff;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.card {
+    background-color: #1e293b; /* Lighter slate card surface */
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+    margin-top: 0;
+    color: #38bdf8; /* Light sky blue accent heading */
+}
+
+p {
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    background-color: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+input:focus {
+    outline: none;
+    border-color: #38bdf8;
+}
+
+button {
+    width: 100%;
+    background-color: #38bdf8;
+    color: #0f172a;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #7dd3fc;
+}
+/* ==========================================
+   ADMINISTRATIVE DASHBOARD STYLES (dashboard.html)
+   ========================================== */
+
+.dashboard-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation Layout */
+.sidebar {
+    width: 260px;
+    background-color: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.logo-area h3 {
+    margin: 0 0 40px 0;
+    color: #38bdf8;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nav-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    background-color: #0f172a;
+    color: #38bdf8;
+}
+
+.nav-links a.logout-link {
+    margin-top: 40px;
+    color: #f87171;
+    border-top: 1px solid #334155;
+    border-radius: 0;
+    padding-top: 20px;
+}
+
+/* Main Display Area Layout */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    box-sizing: border-box;
+    background-color: #0f172a;
+}
+
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 20px;
+}
+
+.dash-header h2 {
+    margin: 0;
+    color: #ffffff;
+}
+
+.school-badge {
+    background-color: #1e293b;
+    color: #38bdf8;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #334155;
+}
+
+/* Operational Metrics Cards Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.metric-card {
+    background-color: #1e293b;
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+}
+
+.metric-card h4 {
+    margin: 0 0 12px 0;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.metric-value {
+    margin: 0 0 6px 0;
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.metric-sub {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Action Hub Panel */
+.action-hub {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 32px;
+}
+
+.action-hub h3 {
+    margin-top: 0;
+    color: #ffffff;
+    font-size: 18px;
+}
+
+.action-hub p {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.btn-action {
+    background-color: #0f172a;
+    color: #cbd5e1;
+    border: 1px solid #475569;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action:hover {
+    border-color: #38bdf8;
+    color: #38bdf8;
+    background-color: rgba(56, 189, 248, 0.05);
+}
+/* ==========================================
+   STUDENT ROSTER PORTAL STYLES (enroll-students.html)
+   ========================================== */
+
+.back-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #38bdf8;
+}
+
+.setup-grid {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.panel h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #ffffff;
+    font-size: 16px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 12px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    background-color: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+/* Tabular Roster Spreadsheet Layout */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+th {
+    background-color: #0f172a;
+    text-align: left;
+    padding: 12px;
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 600;
+    border-bottom: 2px solid #334155;
+}
+
+td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #334155;
+}
+
+td input {
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+td input:focus {
+    background-color: #0f172a;
+    border-color: #334155;
+}
+
+.table-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #334155;
+}
+
+.btn-secondary {
+    background-color: #334155;
+    color: #cbd5e1;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+    color: #ffffff;
+}
+
+.remove-btn {
+    color: #f87171;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.remove-btn:hover {
+    text-decoration: underline;
+}
+/* ==========================================
+   CLASS INFRASTRUCTURE MAPPING COMPONENT STYLES
+   ========================================== */
+
+.class-map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.class-card {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.class-card:hover {
+    border-color: #475569;
+    transform: translateY(-2px);
+}
+
+.class-card-header {
+    background-color: #1e293b;
+    padding: 10px 16px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 1px solid #334155;
+    letter-spacing: 0.5px;
+}
+
+.class-card-body {
+    padding: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.arm-pill {
+    background-color: #1e1b4b;
+    color: #a78bfa;
+    border: 1px solid #4c1d95;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+}
+/* ==========================================
+   INTERACTIVE MOBILE SLIDING HAMBURGER MENU STYLES
+   ========================================== */
+
+/* Hamburger Button Icon Element Styling */
+.hamburger-menu-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    display: none; /* Hidden by default on widescreen laptop screens */
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.hamburger-menu-btn:hover {
+    background-color: #1e293b;
+}
+
+/* Close/Exit 'X' Button inside Sidebar */
+.close-menu-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 28px;
+    cursor: pointer;
+    display: none; /* Only reveals when sliding out on mobile/tablet widths */
+}
+
+.close-menu-btn:hover {
+    color: #ffffff;
+}
+
+/* Dim backdrop wrapper cover overlay layout styling */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.75); /* Dark translucent glass tint */
+    backdrop-filter: blur(4px);
+    z-index: 99; /* Positions below sidebar menu but over primary content blocks */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* RESPONSIVE LAYOUT SYSTEM: Adapts interface design dynamically for tablets and small viewports */
+@media (max-width: 992px) {
+    .hamburger-menu-btn {
+        display: block; /* Reveals the 3-dash button on compact layouts */
+    }
+
+    .close-menu-btn {
+        display: block; /* Shows X inside the sidebar title bar area */
+    }
+
+    .logo-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .dashboard-container {
+        grid-template-columns: 1fr; /* Renders main content panel across full body span width */
+    }
+
+    /* Repositions the sidebar menu window off-screen to the left side edge */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px; /* Hidden completely away past left window margin border */
+        width: 260px;
+        height: 100vh;
+        z-index: 100; /* Floats top layer over active working panels */
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.5);
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Creates smooth glide animation */
+    }
+
+    /* Visual modifier class applied via JavaScript click action loop */
+    .sidebar.open {
+        left: 0; /* Slides smoothly into frame display view lock boundary position */
+    }
+}
+/* ==========================================
+   ENHANCED BIG-NUMBER METRICS CARDS
+   ========================================== */
+
+/* Elevates the standard database counting numbers */
+.metric-card .number {
+    font-size: 38px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+    margin: 12px 0 6px 0;
+    letter-spacing: -1px;
+}
+
+/* Specific engineering for the mega total student tracker metric display */
+.metric-card .number.large-display {
+    font-size: 52px; /* Amplified big text scaling */
+    font-weight: 900;
+    color: #38bdf8; /* Uses a vivid electric sky blue color hue to stand out instantly */
+    text-shadow: 0 0 20px rgba(56, 189, 248, 0.15); /* Adds a subtle energetic ambient glow */
+}
+
+/* Subtle background accent color for the prominent student card block panel */
+.metric-card.student-highlight {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+/* Status tag label color adjustments */
+.trend.status-active {
+    color: #38bdf8;
+    background-color: rgba(56, 189, 248, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ==========================================================================
+   GLOBAL TIERS GATEWAY STRIP
+   ========================================================================== */
+.portal-navigation-strip {
+    background: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    border-bottom: 1px solid #1e293b;
+    width: 100%;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+}
+
+.portal-brand {
+    color: #38bdf8;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.portal-links {
+    display: flex;
+    gap: 12px;
+}
+
+.portal-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.portal-links a.active-tier {
+    color: #ffffff;
+    background: #2563eb;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.portal-links a:hover:not(.active-tier) {
+    color: #f1f5f9;
+    background: #1e293b;
+}
+
+/* ==========================================================================
+   MAIN INTEGRATED FLEXBOX WORKSPACE
+   ========================================================================== */
+.dashboard-container {
+    display: flex;
+    min-height: calc(100vh - 51px); /* Accounts perfectly for the navigation strip height */
+    width: 100%;
+    background-color: #0b0f19;
+    position: relative;
+}
+
+/* SIDEBAR FIX: Set absolute structural width variables */
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    background-color: #111827;
+    border-right: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+.logo-area h3 {
+    color: #38bdf8;
+    margin: 0 0 32px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* MAIN CONTENT BLOCK FIX */
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+    box-sizing: border-box;
+    background: #0b0f19;
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   METRICS GRID & CARD COMPONENTS
+   ========================================================================== */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.metric-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    border-color: #475569;
+}
+
+.metric-card h4 {
+    margin: 0 0 12px 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.metric-card .number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 8px 0;
+    line-height: 1;
+}
+
+/* Highlights for student total indicator metrics */
+.student-highlight {
+    border-color: #2563eb;
+    background: linear-gradient(145deg, #1e293b, #1e1b4b);
+}
+
+.student-highlight .number {
+    color: #38bdf8;
+}
